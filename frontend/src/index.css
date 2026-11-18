@@ -1,0 +1,268 @@
+@import 'tailwindcss';
+@import './styles/tokens.css';
+
+/* Modo escuro por classe (Tailwind v4) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-page: var(--page);
+  --color-page-2: var(--page-2);
+  --color-card: var(--card);
+  --color-card-2: var(--card-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-active: var(--active);
+  --color-content: var(--content);
+  --color-muted: var(--muted);
+  --color-inverse: var(--inverse);
+  --color-inverse-text: var(--inverse-text);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --radius-card: var(--r-lg);
+  --radius-chip: var(--r);
+  --radius-pill: 999px;
+
+  --font-sans: var(--font);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-page text-content antialiased;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.006em;
+}
+
+/* ---------- Tipografia ---------- */
+.display {
+  font-family: var(--font-display);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+}
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.eyebrow {
+  @apply text-muted;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ---------- Superfícies ---------- */
+.card {
+  @apply bg-card border border-line rounded-card p-4;
+  box-shadow: var(--shadow);
+}
+
+.card-hover {
+  @apply bg-card border border-line rounded-card p-4 cursor-pointer;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.card-hover:hover {
+  @apply border-accent;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.hero {
+  @apply rounded-card p-5 text-white relative overflow-hidden;
+  background: var(--gradient-hero);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ---------- Botões (pill, como no Nexo) ---------- */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-pill px-4 text-sm font-semibold
+    transition-all cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed
+    bg-accent text-accent-ink;
+  height: 38px;
+  transition-timing-function: var(--ease);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-pill px-4 text-sm font-medium
+    transition-colors cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed
+    bg-transparent text-content;
+  height: 38px;
+  transition-timing-function: var(--ease);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--card-2);
+}
+
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2 rounded-pill px-4 text-sm font-semibold
+    transition-colors cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed
+    bg-danger text-white;
+  height: 38px;
+}
+.btn-danger:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-soft {
+  @apply inline-flex items-center justify-center gap-2 rounded-pill px-4 text-sm font-semibold
+    transition-colors cursor-pointer select-none bg-accent-soft text-accent;
+  height: 38px;
+}
+.btn-soft:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.btn-inverse {
+  @apply inline-flex items-center justify-center gap-2 rounded-pill px-4 text-sm font-semibold
+    transition-colors cursor-pointer select-none bg-inverse text-inverse-text;
+  height: 38px;
+}
+.btn-inverse:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* ---------- Formulários ---------- */
+.input {
+  @apply w-full rounded-chip border border-line bg-card px-3 text-sm text-content
+    placeholder:text-muted focus:outline-none;
+  height: 40px;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+select.input {
+  cursor: pointer;
+}
+
+.label {
+  @apply block text-muted mb-1;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---------- Chips e badges ---------- */
+.badge-success {
+  @apply inline-flex items-center gap-1 rounded-pill px-2.5 py-0.5 text-xs font-semibold bg-success-soft text-success;
+}
+.badge-danger {
+  @apply inline-flex items-center gap-1 rounded-pill px-2.5 py-0.5 text-xs font-semibold bg-danger-soft text-danger;
+}
+.badge-warning {
+  @apply inline-flex items-center gap-1 rounded-pill px-2.5 py-0.5 text-xs font-semibold bg-warning-soft text-warning;
+}
+.badge-accent {
+  @apply inline-flex items-center gap-1 rounded-pill px-2.5 py-0.5 text-xs font-semibold bg-accent-soft text-accent;
+}
+.badge-neutral {
+  @apply inline-flex items-center gap-1 rounded-pill px-2.5 py-0.5 text-xs font-semibold bg-card-2 text-muted;
+}
+
+/* ---------- Navegação ---------- */
+.nav-item {
+  @apply flex items-center gap-3 rounded-chip px-3 text-sm font-medium text-muted;
+  height: 38px;
+  transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
+}
+.nav-item:hover {
+  @apply bg-card-2 text-content;
+}
+.nav-item-active {
+  @apply bg-active text-accent;
+}
+
+/* ---------- Gamificação ---------- */
+.xp-track {
+  @apply h-2 w-full rounded-pill overflow-hidden bg-card-2;
+}
+.xp-fill {
+  @apply h-full rounded-pill;
+  background: var(--gradient-xp);
+  transition: width 0.7s var(--ease);
+}
+
+.mission {
+  @apply flex items-start gap-3 rounded-chip border border-line bg-card p-3 cursor-pointer;
+  transition: border-color 0.18s var(--ease), background-color 0.18s var(--ease);
+}
+.mission:hover {
+  @apply border-accent bg-accent-soft;
+}
+.mission-done {
+  @apply flex items-start gap-3 rounded-chip border p-3;
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
+  background: var(--success-soft);
+}
+
+.tile {
+  @apply flex flex-col items-center justify-center gap-1 rounded-chip border border-line bg-card p-3
+    text-center cursor-pointer;
+  transition: border-color 0.18s var(--ease), background-color 0.18s var(--ease), transform 0.18s var(--ease);
+}
+.tile:hover {
+  @apply border-accent bg-accent-soft;
+  transform: translateY(-1px);
+}
+.tile-selected {
+  @apply flex flex-col items-center justify-center gap-1 rounded-chip border-2 p-3 text-center cursor-pointer;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ---------- Animações ---------- */
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-pop {
+  animation: pop-in 0.28s var(--ease) both;
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.animate-glow {
+  animation: glow 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,40 @@
+# Env e segredos
+.env
+.env.local
+.env.*.local
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# Toolchain local (JDK, Maven, Node portateis, logs e tokens de teste)
+.toolchain/
+
+# Java / Maven
+backend/target/
+*.class
+*.jar
+!backend/.mvn/wrapper/maven-wrapper.jar
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Cobertura e temporarios
+*.log
+coverage/
+tmp/

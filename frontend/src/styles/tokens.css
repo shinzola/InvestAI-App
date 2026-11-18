@@ -1,0 +1,116 @@
+/* ============================================================
+   InvestIA — Design tokens
+   Estrutura inspirada no Nexo: escada de superfícies (page < card <
+   card-2 < active), raios 8/12/16/22, tipografia display + mono para
+   números, botões pill. Acento roxo (lavanda) em ambos os temas.
+   Nenhuma cor hardcoded nas telas: tudo vem daqui.
+   ============================================================ */
+:root {
+  /* ---- Superfícies (claro) ---- */
+  --page: #f7f5ff;
+  --page-2: #efeaff;
+  --card: #ffffff;
+  --card-2: #f4f1fd;
+  --line: #e6e1f5;
+  --line-strong: #d5cdee;
+  --active: #ece6ff;
+  --overlay: rgb(23 20 31 / 0.55);
+
+  /* ---- Texto ---- */
+  --content: #17141f;
+  --muted: #6f6a80;
+  --inverse: #17141f;
+  --inverse-text: #f7f5ff;
+
+  /* ---- Acento ---- */
+  --accent: #6d4ae0;
+  --accent-2: #7c5cf0;
+  --accent-strong: #5a37cc;
+  --accent-soft: #ece6ff;
+  --accent-ink: #ffffff;
+  --accent-border: color-mix(in srgb, #6d4ae0 34%, transparent);
+
+  /* ---- Semânticos ---- */
+  --success: #0f9d76;
+  --success-soft: #e2f7f0;
+  --danger: #d93a56;
+  --danger-soft: #fdeaee;
+  --warning: #b8790a;
+  --warning-soft: #fdf3e0;
+  --info: #3b6fd4;
+  --info-soft: #e8effc;
+
+  /* ---- Gradientes ---- */
+  --gradient-hero: linear-gradient(135deg, #5a37cc 0%, #7c5cf0 52%, #a78bfa 100%);
+  --gradient-xp: linear-gradient(90deg, #6d4ae0, #b794f6);
+
+  /* ---- Raios ---- */
+  --r-sm: 8px;
+  --r: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --radius: var(--r-lg);
+  --radius-sm: var(--r);
+
+  /* ---- Sombras ---- */
+  --shadow-sm: 0 1px 2px rgb(76 45 145 / 0.06);
+  --shadow: 0 1px 2px rgb(76 45 145 / 0.06), 0 10px 28px -18px rgb(76 45 145 / 0.28);
+  --shadow-lg: 0 2px 6px rgb(76 45 145 / 0.08), 0 28px 64px -28px rgb(76 45 145 / 0.34);
+  --shadow-lift: var(--shadow-lg);
+
+  /* ---- Tipografia ---- */
+  --font: 'Instrument Sans', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+
+  /* ---- Layout ---- */
+  --sidebar-w: 264px;
+  --header-h: 76px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dark {
+  /* ---- Superfícies (escuro) ---- */
+  --page: #0d0b14;
+  --page-2: #12101c;
+  --card: #16131f;
+  --card-2: #1e1a2b;
+  --line: #262133;
+  --line-strong: #352e47;
+  --active: #241f33;
+  --overlay: rgb(0 0 0 / 0.7);
+
+  /* ---- Texto ---- */
+  --content: #f2eefb;
+  --muted: #9a93ad;
+  --inverse: #f2eefb;
+  --inverse-text: #0d0b14;
+
+  /* ---- Acento ---- */
+  --accent: #a78bfa;
+  --accent-2: #8b5cf6;
+  --accent-strong: #c4b5fd;
+  --accent-soft: #241d3d;
+  --accent-ink: #120c22;
+  --accent-border: color-mix(in srgb, #a78bfa 36%, transparent);
+
+  /* ---- Semânticos ---- */
+  --success: #34d399;
+  --success-soft: #17392f;
+  --danger: #fb7185;
+  --danger-soft: #3d1c26;
+  --warning: #fbbf24;
+  --warning-soft: #3a2c12;
+  --info: #93aeff;
+  --info-soft: #1b2340;
+
+  /* ---- Gradientes ---- */
+  --gradient-hero: linear-gradient(135deg, #4c2fa8 0%, #6d4ae0 52%, #a78bfa 100%);
+  --gradient-xp: linear-gradient(90deg, #8b5cf6, #c4b5fd);
+
+  /* ---- Sombras ---- */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.45), 0 14px 32px -20px rgb(0 0 0 / 0.9);
+  --shadow-lg: 0 2px 6px rgb(0 0 0 / 0.5), 0 32px 80px -28px rgb(0 0 0 / 1);
+  --shadow-lift: var(--shadow-lg);
+}
