@@ -154,10 +154,27 @@ export interface AiTestResult {
   sample: string | null;
 }
 
+export interface AiPreset {
+  id: string;
+  label: string;
+  baseUrl: string;
+  model: string;
+  hint: string;
+}
+
+export interface AiModels {
+  baseUrl: string;
+  model: string;
+  models: string[];
+  discovered: boolean;
+}
+
 export const aiSettingsApi = {
   get: () => api.get<AiSettings>('/ai/settings'),
   save: (payload: { baseUrl: string; model: string; apiKey?: string }) =>
     api.put<AiSettings>('/ai/settings', payload),
   clear: () => api.delete('/ai/settings'),
   test: () => api.post<AiTestResult>('/ai/settings/test'),
+  models: () => api.get<AiModels>('/ai/settings/models'),
+  presets: () => api.get<AiPreset[]>('/ai/settings/presets'),
 };

@@ -43,6 +43,27 @@ public class AiSettingsService {
     public record TestResult(boolean ok, String message, String sample) {
     }
 
+    /** Provedor conhecido, para preencher a configuração com um clique. */
+    public record Preset(String id, String label, String baseUrl, String model, String hint) {
+    }
+
+    public record ModelsView(String baseUrl, String model, List<String> models, boolean discovered) {
+    }
+
+    private static final List<Preset> PRESETS = List.of(
+            new Preset("omnibridge", "OmniBridge (Gemini)",
+                    "http://host.docker.internal:8000/v1", "gemini-3.6-flash",
+                    "Proxy auto-hospedado que expõe o Gemini como API OpenAI. Chave sk-omni-..."),
+            new Preset("openai", "OpenAI",
+                    "https://api.openai.com/v1", "gpt-4o-mini",
+                    "Chave sk-... do painel da OpenAI"),
+            new Preset("groq", "Groq",
+                    "https://api.groq.com/openai/v1", "llama-3.3-70b-versatile",
+                    "Chave gsk_... com camada gratuita"),
+            new Preset("ollama", "Ollama (local)",
+                    "http://host.docker.internal:11434/v1", "llama3.1",
+                    "Roda na sua máquina; qualquer valor serve como chave"));
+
     @Transactional(readOnly = true)
     public LlmConfig resolve(UUID userId) {
         return repository.findById(userId)
@@ -101,6 +122,18 @@ public class AiSettingsService {
             log.warn("Teste de LLM falhou: {}", e.getMessage());
             return new TestResult(false, "Falha ao chamar o provedor: " + e.getMessage(), null);
         }
+    }
+
+    public List<Preset> presets() {
+        return PRESETS;
+    }
+
+    /** Consulta GET /models no provedor configurado para o usuário. */
+    @Transactional(readOnly = true)
+    public ModelsView models(UUID userId) {
+        LlmConfig cfg = resolve(userId);
+        List<String> found = llm.models(cfg);
+        return new ModelsView(cfg.normalizedBaseUrl(), cfg.safeModel(), found, !found.isEmpty());
     }
 
     private static boolean blank(String s) {

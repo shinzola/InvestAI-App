@@ -165,3 +165,51 @@ conclusão de meta e score acima de 80.
 aposentadoria, carro, educação, casamento, liberdade financeira). O usuário seleciona vários,
 ajusta o valor-alvo de cada um e cria todos de uma vez.
 
+---
+
+## 9. Copiloto IA e provedores
+
+O copiloto (`/chat`) é um agente com tool calling: o modelo escolhe entre nove ferramentas
+(`create_expense`, `create_income`, `create_planned_expense`, `create_goal`, `contribute_goal`,
+`mark_planned_paid`, `summary`, `list_goals`, `list_accounts`), recebe os resultados reais e só
+então redige a resposta. Nenhum número é inventado pelo modelo.
+
+### Provedores suportados
+
+Qualquer endpoint compatível com `POST /v1/chat/completions` e `GET /v1/models`:
+
+| Preset | Base URL | Modelo padrão |
+|---|---|---|
+| OmniBridge (Gemini) | `http://host.docker.internal:8000/v1` | `gemini-3.6-flash` |
+| OpenAI | `https://api.openai.com/v1` | `gpt-4o-mini` |
+| Groq | `https://api.groq.com/openai/v1` | `llama-3.3-70b-versatile` |
+| Ollama (local) | `http://host.docker.internal:11434/v1` | `llama3.1` |
+
+A configuração fica em **Ajustes → Inteligência artificial**, por usuário, com precedência sobre
+as variáveis de ambiente. A chave é gravada no banco e devolvida sempre mascarada (`••••1234`).
+
+### OmniBridge (Gemini sem custo por token)
+
+O [OmniBridge](https://github.com/exelite-dev/Free-Gemini-pro-API) é um proxy auto-hospedado que
+traduz sessões web do Gemini para o formato OpenAI, com tool calling e `reasoning_content`.
+
+```bash
+git clone https://github.com/exelite-dev/Free-Gemini-pro-API
+cd Free-Gemini-pro-API
+cp .env.example .env          # defina ADMIN_PASSWORD e ADMIN_SECRET_KEY
+docker compose up -d          # sobe em http://localhost:8000
+```
+
+Depois, em `http://localhost:8000/admin`: cadastre a conta Gemini (cookies `__Secure-1PSID` e
+`__Secure-1PSIDTS`) e gere uma chave `sk-omni-...`. No InvestIA, use o preset **OmniBridge (Gemini)**,
+cole a chave e clique em **Buscar modelos do provedor** para escolher entre os modelos listados.
+
+Detalhes de implementação:
+
+- `LlmConfig.normalizedBaseUrl()` completa o `/v1` quando a URL vem sem versão
+  (`http://localhost:8000` → `http://localhost:8000/v1`), evitando 404.
+- `OpenAiCompatibleLlmClient.models()` consome `GET /v1/models` e alimenta os chips de modelo na UI.
+- `parse()` aceita `content` como texto, nulo ou lista de partes e cai para `reasoning_content`
+  quando o provedor devolve o texto apenas no fluxo de raciocínio.
+- Sem chave configurada, o copiloto continua funcionando no modo determinístico em pt-BR.
+

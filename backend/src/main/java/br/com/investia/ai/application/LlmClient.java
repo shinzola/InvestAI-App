@@ -14,6 +14,11 @@ public interface LlmClient {
 
     Completion chat(LlmConfig config, List<Message> messages, List<ToolSpec> tools);
 
+    /** Modelos expostos pelo provedor (GET /models). Vazio quando não suportado. */
+    default List<String> models(LlmConfig config) {
+        return List.of();
+    }
+
     /** Mensagem no formato do protocolo de chat. */
     record Message(String role, String content, List<ToolCall> toolCalls, String toolCallId) {
 

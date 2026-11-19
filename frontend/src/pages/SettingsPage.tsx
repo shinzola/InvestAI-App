@@ -24,6 +24,12 @@ export function SettingsPage() {
   const categories = useQuery({ queryKey: ['categories'], queryFn: () => categoriesApi.list().then((r) => r.data) });
 
   const aiSettings = useQuery({ queryKey: ['ai-settings'], queryFn: () => aiSettingsApi.get().then((r) => r.data) });
+  const aiPresets = useQuery({ queryKey: ['ai-presets'], queryFn: () => aiSettingsApi.presets().then((r) => r.data) });
+  const aiModels = useQuery({
+    queryKey: ['ai-models'],
+    queryFn: () => aiSettingsApi.models().then((r) => r.data),
+    enabled: false,
+  });
   const [ai, setAi] = useState({ baseUrl: '', model: '', apiKey: '' });
   const [aiTest, setAiTest] = useState<{ ok: boolean; message: string } | null>(null);
 
@@ -353,8 +359,9 @@ export function SettingsPage() {
 
       <Card title="Inteligência artificial">
         <p className="text-xs text-muted mb-3">
-          Conecte um provedor compatível com OpenAI (OpenAI, Abacus RouteLLM, Groq, Together, Ollama).
-          Com chave, o copiloto conversa com memória e encadeia ações; sem chave, ele segue no modo local.
+          Conecte um provedor compatível com OpenAI (OpenAI, Groq, Ollama, Abacus RouteLLM) ou um proxy
+          auto-hospedado como o OmniBridge, que expõe o Gemini como API OpenAI. Com chave, o copiloto
+          conversa com memória e encadeia ações; sem chave, ele segue no modo local.
         </p>
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <span className={aiSettings.data?.configured ? 'badge badge-accent' : 'badge badge-neutral'}>
@@ -371,6 +378,21 @@ export function SettingsPage() {
           className="space-y-3"
           onSubmit={(e) => { e.preventDefault(); saveAi.mutate(); }}
         >
+          {aiPresets.data && aiPresets.data.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {aiPresets.data.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="btn-ghost text-xs"
+                  title={p.hint}
+                  onClick={() => setAi((prev) => ({ ...prev, baseUrl: p.baseUrl, model: p.model }))}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          )}
           <Field label="Base URL">
             <Input
               required
@@ -387,6 +409,36 @@ export function SettingsPage() {
               onChange={(e) => setAi({ ...ai, model: e.target.value })}
             />
           </Field>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              className="btn-ghost text-xs"
+              type="button"
+              onClick={() => aiModels.refetch()}
+              disabled={aiModels.isFetching}
+            >
+              {aiModels.isFetching ? 'Buscando...' : 'Buscar modelos do provedor'}
+            </button>
+            {aiModels.data?.discovered && (
+              <span className="text-xs text-muted">{aiModels.data.models.length} modelos disponíveis</span>
+            )}
+            {aiModels.data && !aiModels.data.discovered && (
+              <span className="text-xs text-muted">o provedor não listou modelos; digite o nome acima</span>
+            )}
+          </div>
+          {aiModels.data?.discovered && (
+            <div className="flex flex-wrap gap-1.5">
+              {aiModels.data.models.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  className={m === ai.model ? 'badge badge-accent' : 'badge badge-neutral'}
+                  onClick={() => setAi((prev) => ({ ...prev, model: m }))}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          )}
           <Field label="Chave da API">
             <Input
               type="password"

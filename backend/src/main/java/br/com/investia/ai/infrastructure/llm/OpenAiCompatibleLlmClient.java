@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -46,12 +47,9 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
         }
 
         String response = RestClient.builder()
-                .baseUrl(config.safeBaseUrl())
+                .baseUrl(config.normalizedBaseUrl())
                 .defaultHeader("Authorization", "Bearer " + config.apiKey().trim())
-                .requestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory() {{
-                    setConnectTimeout((int) Duration.ofSeconds(15).toMillis());
-                    setReadTimeout((int) Duration.ofSeconds(90).toMillis());
-                }})
+                .requestFactory(requestFactory())
                 .build()
                 .post()
                 .uri("/chat/completions")
@@ -61,6 +59,48 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
                 .body(String.class);
 
         return parse(response);
+    }
+
+    /**
+     * Lista os modelos do provedor. Funciona com OpenAI e com proxies
+     * compatíveis (OmniBridge expõe GET /v1/models com os modelos Gemini).
+     */
+    @Override
+    public List<String> models(LlmConfig config) {
+        if (!enabled(config)) {
+            return List.of();
+        }
+        try {
+            String response = RestClient.builder()
+                    .baseUrl(config.normalizedBaseUrl())
+                    .defaultHeader("Authorization", "Bearer " + config.apiKey().trim())
+                    .requestFactory(requestFactory())
+                    .build()
+                    .get()
+                    .uri("/models")
+                    .retrieve()
+                    .body(String.class);
+            JsonNode root = mapper.readTree(response);
+            List<String> ids = new ArrayList<>();
+            for (JsonNode node : root.path("data")) {
+                String id = node.path("id").asText("");
+                if (!id.isBlank()) {
+                    ids.add(id);
+                }
+            }
+            ids.sort(String::compareTo);
+            return ids;
+        } catch (RuntimeException | java.io.IOException e) {
+            log.warn("Falha ao listar modelos em {}: {}", config.normalizedBaseUrl(), e.getMessage());
+            return List.of();
+        }
+    }
+
+    private SimpleClientHttpRequestFactory requestFactory() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout((int) Duration.ofSeconds(15).toMillis());
+        factory.setReadTimeout((int) Duration.ofSeconds(90).toMillis());
+        return factory;
     }
 
     private Map<String, Object> toWire(Message m) {
@@ -102,7 +142,10 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
         try {
             JsonNode root = mapper.readTree(response);
             JsonNode message = root.path("choices").path(0).path("message");
-            String content = message.path("content").isNull() ? null : message.path("content").asText(null);
+            String content = text(message.path("content"));
+            if (content == null || content.isBlank()) {
+                content = text(message.path("reasoning_content"));
+            }
             List<ToolCall> calls = new ArrayList<>();
             for (JsonNode call : message.path("tool_calls")) {
                 JsonNode fn = call.path("function");
@@ -115,5 +158,20 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
             log.warn("Resposta de LLM ilegível: {}", e.getMessage());
             return Completion.text(null);
         }
+    }
+
+    /** Aceita content como texto, nulo ou lista de partes (formato multimodal). */
+    private String text(JsonNode node) {
+        if (node == null || node.isMissingNode() || node.isNull()) {
+            return null;
+        }
+        if (node.isArray()) {
+            StringBuilder sb = new StringBuilder();
+            for (JsonNode part : node) {
+                sb.append(part.path("text").asText(""));
+            }
+            return sb.toString();
+        }
+        return node.asText(null);
     }
 }

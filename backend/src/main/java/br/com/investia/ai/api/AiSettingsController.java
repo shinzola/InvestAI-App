@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "Configuração de IA", description = "Provedor de LLM usado pelo copiloto")
@@ -42,5 +43,17 @@ public class AiSettingsController {
     @PostMapping("/test")
     public AiSettingsService.TestResult test() {
         return settings.test(SecurityUtils.currentUserId());
+    }
+
+    @Operation(summary = "Modelos disponíveis no provedor configurado")
+    @GetMapping("/models")
+    public AiSettingsService.ModelsView models() {
+        return settings.models(SecurityUtils.currentUserId());
+    }
+
+    @Operation(summary = "Presets de provedores conhecidos")
+    @GetMapping("/presets")
+    public List<AiSettingsService.Preset> presets() {
+        return settings.presets();
     }
 }
