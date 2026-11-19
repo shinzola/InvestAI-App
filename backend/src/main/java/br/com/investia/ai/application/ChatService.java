@@ -269,10 +269,13 @@ public class ChatService {
                 return intent("contribute_goal", args);
             }
         }
-        if (q.contains("meta") && (q.contains("criar") || q.contains("crie") || q.contains("nova"))) {
+        if (q.contains("meta") && anyStem(q, "cri", "nova", "novo", "abrir", "montar", "quero", "fazer", "definir")) {
+            if (amount == null) {
+                return null;
+            }
             Map<String, Object> args = new LinkedHashMap<>();
             args.put("name", description.isBlank() ? "Nova meta" : description);
-            args.put("targetAmount", amount == null ? "1000" : amount);
+            args.put("targetAmount", amount);
             if (date != null) {
                 args.put("targetDate", date);
             }
@@ -305,7 +308,7 @@ public class ChatService {
                 return intent("create_income", args);
             }
         }
-        if (q.contains("gastei") || q.contains("paguei") || q.contains("comprei") || q.contains("despesa")) {
+        if (anyStem(q, "gastei", "gasto", "gastar", "paguei", "pagar", "comprei", "compra", "despesa")) {
             if (amount != null) {
                 Map<String, Object> args = new LinkedHashMap<>();
                 args.put("amount", amount);
@@ -331,9 +334,9 @@ public class ChatService {
 
     private static boolean asksActionWithoutAmount(String question) {
         String q = question.toLowerCase(Locale.ROOT);
-        boolean verb = q.contains("gastei") || q.contains("paguei") || q.contains("comprei")
-                || q.contains("recebi") || q.contains("entrou") || q.contains("caiu")
-                || q.contains("planej") || q.contains("aporte") || q.contains("aportar");
+        boolean verb = anyStem(q, "gastei", "gasto", "gastar", "paguei", "pagar", "comprei", "compra",
+                "recebi", "entrou", "caiu", "planej", "aporte", "aportar")
+                || (q.contains("meta") && anyStem(q, "cri", "nova", "novo", "abrir", "montar", "quero", "fazer", "definir"));
         return verb && firstMatch(AMOUNT, question) == null;
     }
 
@@ -373,6 +376,16 @@ public class ChatService {
     private static String helpText() {
         return "Posso registrar entradas e despesas, planejar gastos, marcar contas como pagas, "
                 + "criar metas e aportar. Diga por exemplo: \"gastei 45,90 no mercado hoje\".";
+    }
+
+    /** Verdadeiro se a frase contém algum dos radicais (cobre cria/criar/crie/criando). */
+    private static boolean anyStem(String q, String... stems) {
+        for (String s : stems) {
+            if (q.contains(s)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Map<String, Object> intent(String tool, Map<String, Object> args) {
@@ -417,8 +430,10 @@ public class ChatService {
         if (date != null) {
             s = s.replace(date, " ");
         }
-        s = s.replaceAll("(?i)\\b(gastei|paguei|comprei|recebi|entrou|caiu|registre|registrar|"
-                + "planeje|planejar|agende|agendar|crie|criar|nova|novo|marcar|como|pago|quitar|"
+        s = s.replaceAll("(?i)\\b(gastei|gasto|gastar|paguei|pagar|comprei|compra|recebi|entrou|caiu|"
+                + "registre|registrar|planeje|planejar|agende|agendar|cria|crie|criar|criando|"
+                + "quero|queria|fazer|abrir|montar|definir|nova|novo|meta|metas|objetivo|"
+                + "marcar|como|pago|quitar|"
                 + "no|na|de|do|da|em|um|uma|reais|r\\$|hoje|ontem|amanhã|amanha)\\b", " ");
         s = s.replaceAll("[^\\p{L}\\p{N} ]", " ").replaceAll("\\s+", " ").trim();
         return s.length() > 80 ? s.substring(0, 80).trim() : s;

@@ -122,7 +122,12 @@ export function ChatPage() {
         </div>
         <div className="flex items-center gap-2">
           {usedLlm !== null && (
-            <span className={clsx('badge', usedLlm ? 'badge-accent' : 'badge-neutral')}>
+            <span
+              className={clsx('badge', usedLlm ? 'badge-accent' : 'badge-neutral')}
+              title={usedLlm
+                ? 'O copiloto está usando um provedor de IA conectado.'
+                : 'Sem provedor de IA: o copiloto entende frases no padrão "gastei 45,90 no mercado". Conecte uma IA em Ajustes para linguagem livre.'}
+            >
               <Sparkles size={12} />
               {usedLlm ? 'IA conectada' : 'Modo local'}
             </span>
