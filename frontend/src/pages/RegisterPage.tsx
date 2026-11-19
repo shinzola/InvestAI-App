@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Field, Input } from '../components/ui/Form';
+import { Field, Input, Switch } from '../components/ui/Form';
 import { useToast } from '../components/ui/Toast';
 import { problemDetailMessage } from '../services/api';
 
@@ -43,10 +43,10 @@ export function RegisterPage() {
           <Field label="Senha" error={errors.password?.message}>
             <Input type="password" autoComplete="new-password" placeholder="mínimo 8 caracteres" {...register('password')} />
           </Field>
-          <label className="flex items-start gap-2 text-sm text-muted">
-            <input type="checkbox" className="mt-0.5" {...register('acceptTerms')} />
-            Aceito os termos de uso e a política de privacidade (LGPD).
-          </label>
+          <Switch
+            label="Aceito os termos de uso e a política de privacidade (LGPD)."
+            {...register('acceptTerms')}
+          />
           {errors.acceptTerms && <p className="text-xs text-danger">{errors.acceptTerms.message}</p>}
           <button className="btn-primary w-full" disabled={isSubmitting}>
             {isSubmitting ? 'Criando…' : 'Criar conta'}

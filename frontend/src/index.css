@@ -243,6 +243,74 @@ select.input {
   background: var(--accent-soft);
 }
 
+/* ---------- Switch ---------- */
+.switch-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  user-select: none;
+}
+.switch-row:has(.switch-input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  width: 42px;
+  height: 24px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--card-2);
+  transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.switch-thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  transform: translateX(0);
+  transition: transform 0.22s var(--ease), background-color 0.2s var(--ease);
+}
+.switch-input:checked + .switch {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.switch-input:checked + .switch .switch-thumb {
+  transform: translateX(18px);
+  background: #fff;
+}
+.switch-input:focus-visible + .switch {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.switch-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.3;
+}
+.switch-label {
+  font-size: 0.875rem;
+}
+.switch-desc {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 /* ---------- Animações ---------- */
 @keyframes pop-in {
   from { opacity: 0; transform: translateY(6px) scale(0.98); }

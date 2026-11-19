@@ -10,6 +10,12 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,6 +32,10 @@ import java.util.Map;
 public class OpenAiCompatibleLlmClient implements LlmClient {
 
     private final ObjectMapper mapper = new ObjectMapper();
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .connectTimeout(Duration.ofSeconds(15))
+            .build();
 
     @Override
     public boolean enabled(LlmConfig config) {
@@ -46,19 +56,36 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
             body.put("tool_choice", "auto");
         }
 
-        String response = RestClient.builder()
-                .baseUrl(config.normalizedBaseUrl())
-                .defaultHeader("Authorization", "Bearer " + config.apiKey().trim())
-                .requestFactory(requestFactory())
-                .build()
-                .post()
-                .uri("/chat/completions")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .retrieve()
-                .body(String.class);
+        String response = httpPost(config.normalizedBaseUrl() + "/chat/completions", config.apiKey(), body);
 
         return parse(response);
+    }
+
+    /**
+     * POST JSON lendo o corpo como texto, sem negociar content-type.
+     * Proxies como o OmniBridge podem responder application/octet-stream, o que
+     * faz os conversores do RestClient recusarem o corpo.
+     */
+    private String httpPost(String url, String apiKey, Map<String, Object> body) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+                    .timeout(Duration.ofSeconds(90))
+                    .header("Authorization", "Bearer " + apiKey.trim())
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body), StandardCharsets.UTF_8))
+                    .build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() >= 400) {
+                throw new IllegalStateException("HTTP " + response.statusCode() + ": " + response.body());
+            }
+            return response.body();
+        } catch (IOException e) {
+            throw new IllegalStateException("Falha de rede ao chamar " + url + ": " + e.getMessage(), e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Chamada interrompida: " + url, e);
+        }
     }
 
     /**
@@ -71,16 +98,18 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
             return List.of();
         }
         try {
-            String response = RestClient.builder()
-                    .baseUrl(config.normalizedBaseUrl())
-                    .defaultHeader("Authorization", "Bearer " + config.apiKey().trim())
-                    .requestFactory(requestFactory())
-                    .build()
-                    .get()
-                    .uri("/models")
-                    .retrieve()
-                    .body(String.class);
-            JsonNode root = mapper.readTree(response);
+            HttpRequest request = HttpRequest.newBuilder(URI.create(config.normalizedBaseUrl() + "/models"))
+                    .timeout(Duration.ofSeconds(30))
+                    .header("Authorization", "Bearer " + config.apiKey().trim())
+                    .header("Accept", "application/json")
+                    .GET()
+                    .build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() >= 400) {
+                log.warn("Listagem de modelos em {} retornou HTTP {}", config.normalizedBaseUrl(), response.statusCode());
+                return List.of();
+            }
+            JsonNode root = mapper.readTree(response.body());
             List<String> ids = new ArrayList<>();
             for (JsonNode node : root.path("data")) {
                 String id = node.path("id").asText("");
@@ -90,6 +119,10 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
             }
             ids.sort(String::compareTo);
             return ids;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Listagem de modelos interrompida em {}", config.normalizedBaseUrl());
+            return List.of();
         } catch (RuntimeException | java.io.IOException e) {
             log.warn("Falha ao listar modelos em {}: {}", config.normalizedBaseUrl(), e.getMessage());
             return List.of();

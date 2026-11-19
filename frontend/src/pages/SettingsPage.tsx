@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { accountsApi, aiSettingsApi, categoriesApi, usersApi } from '../services/endpoints';
 import { Card, EmptyState } from '../components/ui/Card';
-import { Field, Input, Money, Select } from '../components/ui/Form';
+import { Field, Input, Money, Select, Switch } from '../components/ui/Form';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../components/ui/Toast';
 import { problemDetailMessage } from '../services/api';
@@ -275,14 +275,11 @@ export function SettingsPage() {
               </Field>
               <Field label="Saldo inicial"><Input type="number" step="0.01" value={account.initialBalance} onChange={(e) => setAccount({ ...account, initialBalance: e.target.value })} /></Field>
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={account.hasCreditCard}
-                onChange={(e) => setAccount({ ...account, hasCreditCard: e.target.checked })}
-              />
-              Esta conta também tem cartão de crédito
-            </label>
+            <Switch
+              label="Esta conta também tem cartão de crédito"
+              checked={account.hasCreditCard}
+              onChange={(e) => setAccount({ ...account, hasCreditCard: e.target.checked })}
+            />
             {account.hasCreditCard && (
               <div className="rounded-lg border border-line p-3 space-y-3">
                 <p className="text-xs font-medium text-muted">Fatura e limite do cartão</p>

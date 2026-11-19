@@ -51,6 +51,9 @@ public class AiSettingsService {
     }
 
     private static final List<Preset> PRESETS = List.of(
+            new Preset("google", "Google AI Studio (Gemini)",
+                    "https://generativelanguage.googleapis.com/v1beta/openai", "gemini-2.0-flash",
+                    "Chave AIza... gratuita em aistudio.google.com/apikey. Sem cookies, nao expira"),
             new Preset("omnibridge", "OmniBridge (Gemini)",
                     "http://host.docker.internal:8000/v1", "gemini-3.6-flash",
                     "Proxy auto-hospedado que expõe o Gemini como API OpenAI. Chave sk-omni-..."),

@@ -28,6 +28,30 @@ export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<H
   },
 );
 
+/**
+ * Switch moderno com input nativo oculto: o `register()` do react-hook-form
+ * continua lendo `checked` normalmente, e o foco/teclado seguem acessíveis.
+ */
+export const Switch = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & {
+  label?: ReactNode;
+  description?: ReactNode;
+}>(function Switch({ className, label, description, ...props }, ref) {
+  return (
+    <label className={clsx('switch-row', className)}>
+      <input ref={ref} type="checkbox" className="switch-input" {...props} />
+      <span className="switch" aria-hidden="true">
+        <span className="switch-thumb" />
+      </span>
+      {(label || description) && (
+        <span className="switch-text">
+          {label && <span className="switch-label">{label}</span>}
+          {description && <span className="switch-desc">{description}</span>}
+        </span>
+      )}
+    </label>
+  );
+});
+
 export function Modal({ open, title, onClose, children }: {
   open: boolean;
   title: string;

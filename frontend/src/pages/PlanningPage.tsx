@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { accountsApi, categoriesApi, planningApi } from '../services/endpoints';
 import { Card, EmptyState, Skeleton } from '../components/ui/Card';
-import { Field, Input, Modal, Money, Select } from '../components/ui/Form';
+import { Field, Input, Modal, Money, Select, Switch } from '../components/ui/Form';
 import { useToast } from '../components/ui/Toast';
 import { problemDetailMessage } from '../services/api';
 import { formatDate, todayInput } from '../utils/format';
@@ -162,8 +162,7 @@ export function PlanningPage() {
                       key={item.id}
                       className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-card-2"
                     >
-                      <input
-                        type="checkbox"
+                      <Switch
                         checked={item.status === 'PAID'}
                         onChange={() => toggle.mutate(item.id)}
                         aria-label={`Marcar ${item.description} como pago`}

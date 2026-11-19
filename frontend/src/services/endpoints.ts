@@ -127,7 +127,7 @@ export interface InvoiceImport {
 }
 
 export const chatApi = {
-  send: (message: string) => api.post<ChatReply>('/ai/chat', { message }),
+  send: (message: string) => api.post<ChatReply>('/ai/chat', { message }, { timeout: 120_000 }),
   history: () => api.get<ChatEntry[]>('/ai/chat/history'),
   clear: () => api.delete('/ai/chat/history'),
   importInvoice: (file: File, cardAccountId?: string, year?: number, month?: number) => {
